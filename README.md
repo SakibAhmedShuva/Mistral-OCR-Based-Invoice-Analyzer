@@ -2,7 +2,6 @@
 
 <div align="center">
 
-![Invoice Analyzer Banner](https://via.placeholder.com/1200x300/0078D7/ffffff?text=Mistral+OCR+Invoice+Analyzer)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
