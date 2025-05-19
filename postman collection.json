@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "YOUR_COLLECTION_ID_HERE", // This will be generated on import
+		"name": "Financial Invoice Analyzer API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"description": "API for uploading financial invoices for OCR processing and data extraction."
+	},
+	"item": [
+		{
+			"name": "Upload and Process Invoice",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Response contains csv_filename\", function () {",
+							"    pm.expect(jsonData.csv_filename).to.exist.and.to.be.a('string');",
+							"});",
+							"",
+							"pm.test(\"Response contains invoice_details, line_items, and summary\", function () {",
+							"    pm.expect(jsonData.invoice_details).to.exist.and.to.be.an('object');",
+							"    pm.expect(jsonData.line_items).to.exist.and.to.be.an('array');",
+							"    pm.expect(jsonData.summary).to.exist.and.to.be.an('object');",
+							"});",
+							"",
+							"if (jsonData.csv_filename) {",
+							"    pm.environment.set(\"csv_filename\", jsonData.csv_filename);",
+							"    console.log(\"Set csv_filename to: \" + jsonData.csv_filename);",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": [], // IMPORTANT: You need to select a file here in Postman UI
+							"description": "The invoice file (PDF, PNG, JPG, JPEG) to be processed."
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/process-report",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"process-report"
+					]
+				},
+				"description": "Uploads an invoice file (PDF or image) for OCR processing and structured data extraction.\n\n**Expected Success (200 OK):**\n```json\n{\n    \"invoice_details\": {\n        \"vendor_name\": \"Example Corp\",\n        \"invoice_number\": \"INV-001\",\n        \"invoice_date\": \"2023-01-15\",\n        \"due_date\": \"2023-02-14\",\n        \"currency\": \"USD\"\n    },\n    \"line_items\": [\n        {\n            \"description\": \"Product A\",\n            \"quantity\": 2,\n            \"unit_price\": 50.00,\n            \"line_total\": 100.00\n        }\n    ],\n    \"summary\": {\n        \"subtotal\": 100.00,\n        \"tax_amount\": 8.00,\n        \"total_amount\": 108.00\n    },\n    \"csv_filename\": \"invoice_data_YYYYMMDD_HHMMSS_random.csv\"\n}\n```\n\n**Potential Errors:**\n- 400: No file provided, No file selected, File type not allowed.\n- 500: OCR processing failed, Failed to parse structured data, Other server errors."
+			},
+			"response": []
+		},
+		{
+			"name": "Download Invoice CSV",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is text/csv\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"text/csv\");",
+							"});",
+							"",
+							"pm.test(\"Content-Disposition indicates attachment\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"attachment\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/download/{{csv_filename}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"download",
+						"{{csv_filename}}"
+					]
+				},
+				"description": "Downloads the CSV file generated from a previous invoice processing request.\n\nThe `{{csv_filename}}` path variable should be populated from the response of the \"Upload and Process Invoice\" request (the test script does this automatically by setting an environment variable).\n\n**Expected Success (200 OK):**\n- Response body will be the CSV content.\n- Headers will include `Content-Type: text/csv` and `Content-Disposition: attachment; filename=...`.\n\n**Potential Errors:**\n- 404: File not found (if the filename is incorrect or the file doesn't exist)."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Homepage (Index HTML)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is text/html\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"text/html; charset=utf-8\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Retrieves the main HTML page of the application."
+			},
+			"response": []
+		}
+	],
+	"event": [],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string",
+			"description": "The base URL of the Flask application."
+		},
+		{
+			"key": "csv_filename",
+			"value": "",
+			"type": "string",
+			"description": "Stores the filename of the generated CSV from the /process-report endpoint. Automatically set by the test script in that request."
+		}
+	]
+}
