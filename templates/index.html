@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Invoice Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #90e0ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --body-bg: #f5f7ff;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --text-muted: #6c757d;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-right: 0.75rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary);
+        }
+
+        .upload-container i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-container h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-container p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .file-types {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-type {
+            background-color: var(--light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            outline: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            filter: brightness(0.9);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .results-container {
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--dark);
+            background-color: var(--light);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 8px solid var(--light);
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            background-color: #ffe0e3;
+            color: #e53935;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .error-container i {
+            margin-right: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Responsive table */
+        @media (max-width: 600px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h1>Financial Invoice Analyzer</h1>
+            </div>
+            <p class="subtitle">Upload your financial invoice (PDF or image) and our AI will extract and organize the key details for you.</p>
+        </header>
+
+        <div class="card">
+            <div class="upload-container" id="upload-container">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Upload Invoice</h3>
+                <p>Drag and drop your file here, or click to browse</p>
+                <div class="file-types">
+                    <span class="file-type">PDF</span>
+                    <span class="file-type">JPG</span>
+                    <span class="file-type">PNG</span>
+                </div>
+                <input type="file" id="file-input" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                <button class="btn btn-primary">
+                    <i class="fas fa-upload"></i> Select File
+                </button>
+            </div>
+        </div>
+
+        <div class="error-container" id="error-container">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-message">An error occurred. Please try again.</span>
+        </div>
+
+        <div class="results-container" id="results-container">
+            <div class="card">
+                <div class="results-header">
+                    <h2 class="results-title">Invoice Line Items</h2>
+                    <div class="actions">
+                        <button class="btn btn-outline" id="new-upload-btn">
+                            <i class="fas fa-plus"></i> New Upload
+                        </button>
+                        <button class="btn btn-success" id="download-csv-btn">
+                            <i class="fas fa-download"></i> Download CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table-body">
+                            <!-- Results will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="invoice-summary" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <h4>Invoice Summary</h4>
+                    <p><strong>Vendor:</strong> <span id="summary-vendor">N/A</span></p>
+                    <p><strong>Invoice Number:</strong> <span id="summary-invoice-number">N/A</span></p>
+                    <p><strong>Invoice Date:</strong> <span id="summary-invoice-date">N/A</span></p>
+                    <p><strong>Due Date:</strong> <span id="summary-due-date">N/A</span></p>
+                    <p><strong>Subtotal:</strong> <span id="summary-subtotal">N/A</span> <span id="summary-currency-subtotal"></span></p>
+                    <p><strong>Tax:</strong> <span id="summary-tax">N/A</span> <span id="summary-currency-tax"></span></p>
+                    <p><strong>Total Amount:</strong> <span id="summary-total">N/A</span> <span id="summary-currency-total"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p class="loading-text">Processing your invoice...</p>
+    </div>
+
+    <footer>
+        <p>© 2025 Financial Invoice Analyzer | AI-powered invoice data extraction</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('file-input');
+            const uploadContainer = document.getElementById('upload-container');
+            const resultsContainer = document.getElementById('results-container');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const errorContainer = document.getElementById('error-container');
+            const errorMessage = document.getElementById('error-message');
+            const resultsTableBody = document.getElementById('results-table-body');
+            const newUploadBtn = document.getElementById('new-upload-btn');
+            const downloadCsvBtn = document.getElementById('download-csv-btn');
+
+            // Summary elements
+            const summaryVendor = document.getElementById('summary-vendor');
+            const summaryInvoiceNumber = document.getElementById('summary-invoice-number');
+            const summaryInvoiceDate = document.getElementById('summary-invoice-date');
+            const summaryDueDate = document.getElementById('summary-due-date');
+            const summarySubtotal = document.getElementById('summary-subtotal');
+            const summaryTax = document.getElementById('summary-tax');
+            const summaryTotal = document.getElementById('summary-total');
+            const summaryCurrencySubtotal = document.getElementById('summary-currency-subtotal');
+            const summaryCurrencyTax = document.getElementById('summary-currency-tax');
+            const summaryCurrencyTotal = document.getElementById('summary-currency-total');
+            
+            let currentCsvFilename = null;
+
+            fileInput.addEventListener('change', function(e) {
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    processFile(file);
+                }
+            });
+
+            newUploadBtn.addEventListener('click', function() {
+                resultsContainer.style.display = 'none';
+                errorContainer.style.display = 'none';
+                uploadContainer.style.display = 'flex'; // Changed from 'block' to 'flex' to match original
+                fileInput.value = ''; 
+            });
+
+            downloadCsvBtn.addEventListener('click', function() {
+                if (currentCsvFilename) {
+                    showLoading();
+                    // Using window.location.href for GET request to trigger download
+                    window.location.href = `/download/${currentCsvFilename}`;
+                    // Hide loading after a short delay, actual download is handled by browser
+                    setTimeout(hideLoading, 1500); 
+                }
+            });
+
+            function processFile(file) {
+                const fileType = file.name.split('.').pop().toLowerCase();
+                if (!['pdf', 'jpg', 'jpeg', 'png'].includes(fileType)) {
+                    showError('Invalid file type. Please upload a PDF or image file (JPG, PNG).');
+                    return;
+                }
+
+                showLoading();
+                errorContainer.style.display = 'none'; // Hide previous errors
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/process-report', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'An error occurred while processing the file.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    hideLoading();
+                    
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+
+                    currentCsvFilename = data.csv_filename;
+                    displayResults(data);
+                })
+                .catch(error => {
+                    hideLoading();
+                    showError(error.message);
+                });
+            }
+
+            function displayResults(invoiceData) {
+                resultsTableBody.innerHTML = ''; // Clear previous line items
+                
+                const lineItems = invoiceData.line_items || [];
+                lineItems.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.description || 'N/A'}</td>
+                        <td>${item.quantity !== null && item.quantity !== undefined ? item.quantity : 'N/A'}</td>
+                        <td>${item.unit_price !== null && item.unit_price !== undefined ? item.unit_price : 'N/A'}</td>
+                        <td><strong>${item.line_total !== null && item.line_total !== undefined ? item.line_total : 'N/A'}</strong></td>
+                    `;
+                    resultsTableBody.appendChild(row);
+                });
+
+                // Display summary information
+                const details = invoiceData.invoice_details || {};
+                const summary = invoiceData.summary || {};
+                const currency = details.currency || '';
+
+                summaryVendor.textContent = details.vendor_name || 'N/A';
+                summaryInvoiceNumber.textContent = details.invoice_number || 'N/A';
+                summaryInvoiceDate.textContent = details.invoice_date || 'N/A';
+                summaryDueDate.textContent = details.due_date || 'N/A';
+                
+                summarySubtotal.textContent = summary.subtotal !== null && summary.subtotal !== undefined ? summary.subtotal : 'N/A';
+                summaryTax.textContent = summary.tax_amount !== null && summary.tax_amount !== undefined ? summary.tax_amount : 'N/A';
+                summaryTotal.textContent = summary.total_amount !== null && summary.total_amount !== undefined ? summary.total_amount : 'N/A';
+                
+                summaryCurrencySubtotal.textContent = summary.subtotal !== null && summary.subtotal !== undefined ? currency : '';
+                summaryCurrencyTax.textContent = summary.tax_amount !== null && summary.tax_amount !== undefined ? currency : '';
+                summaryCurrencyTotal.textContent = summary.total_amount !== null && summary.total_amount !== undefined ? currency : '';
+
+                uploadContainer.style.display = 'none';
+                errorContainer.style.display = 'none';
+                resultsContainer.style.display = 'block';
+            }
+
+            function showLoading() {
+                loadingOverlay.style.display = 'flex';
+            }
+
+            function hideLoading() {
+                loadingOverlay.style.display = 'none';
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorContainer.style.display = 'block';
+                resultsContainer.style.display = 'none'; // Hide results if error occurs
+            }
+        });
+    </script>
+</body>
+</html>
